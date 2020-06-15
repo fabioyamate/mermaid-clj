@@ -236,7 +236,7 @@
   (def sample
     (sequence-diagram
      (participants :b :c :d :e :a)
-     (node :a :b "call" "returns")
+     (node :a :call :b "call")
      (synchronous
       :a :b "send"
       (synchronous
