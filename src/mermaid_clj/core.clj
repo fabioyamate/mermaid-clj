@@ -14,8 +14,8 @@
   ;; -x     asynchronous message         Solid line with a cross at the end (async)
   ;; --x    reply asynchronous message   Dotted line with a cross at the end (async)
   {:call "->>+"
-   :async "-X"
-   :message "->"
+   :async "-x"
+   :message "-x"
    :reply "-->>-"
    :return "-->>-"
    :self "->>"})
@@ -229,10 +229,14 @@
        (:body (client/get url {:as :stream}))
        (File. destination)))))
 
+(def request synchronous)
+(def produce async)
+
 (comment
   (def sample
     (sequence-diagram
      (participants :b :c :d :e :a)
+     (node :a :b "call" "returns")
      (synchronous
       :a :b "send"
       (synchronous
