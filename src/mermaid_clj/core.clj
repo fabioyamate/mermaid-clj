@@ -113,19 +113,40 @@
    :yellow "rgb(255,255,0,0.5)"
    :gray "rgb(0,0,0,0.1)"})
 
+(defn multi-line
+  "breaks a long text into multiple lines"
+  [s length]
+  (let [words (clojure.string/split s #"\s+")
+        data (reduce (fn [state word]
+                       (cond (empty? (:current state)) ;; handle in case word is bigger than the lenght
+                             (assoc state :current word)
+
+                             (>= (count (str (:current state) " " word))
+                                 length)
+                             (-> state
+                                 (update :lines conj (:current state))
+                                 (assoc :current word))
+
+                             :else
+                             (update state :current str " " word)))
+                     {:lines []
+                      :current ""}
+                     words)]
+    (clojure.string/join "<br>" (conj (:lines data) (:current data)))))
+
 (defn note-right
   [actor note]
-  (with-meta [actor note] {::note-right true}))
+  (with-meta [actor (multi-line note 20)] {::note-right true}))
 
 (defn note-left
   [actor note]
-  (with-meta [actor note] {::note-left true}))
+  (with-meta [actor (multi-line note 20)] {::note-left true}))
 
 (defn note-over
   ([actor note]
    (note-over actor nil note))
   ([actor1 actor2 note]
-   (with-meta [actor1 actor2 note] {::note-over true})))
+   (with-meta [actor1 actor2 (multi-line note 60)] {::note-over true})))
 
 (defn highlight
   [color & forms]
