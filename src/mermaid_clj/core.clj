@@ -68,7 +68,9 @@
                    (str "Note right of " (actor-name actor) ": " note))
 
     ::note-over (let [[actor1 actor2 note] sequence-diagram]
-                  (str "Note over " (actor-name actor1) "," (actor-name actor2) ": " note))
+                  (if actor2
+                    (str "Note over " (actor-name actor1) "," (actor-name actor2) ": " note)
+                    (str "Note over " (actor-name actor1) ": " note)))
 
     ::highlight (str "rect " (::highlight (meta sequence-diagram)) "\n"
                      (render* (apply group sequence-diagram))
@@ -118,8 +120,10 @@
   (with-meta [actor note] {::note-left true}))
 
 (defn note-over
-  [actor1 actor2 note]
-  (with-meta [actor1 actor2 note] {::note-over true}))
+  ([actor note]
+   (note-over actor nil note))
+  ([actor1 actor2 note]
+   (with-meta [actor1 actor2 note] {::note-over true})))
 
 (defn highlight
   [color & forms]
@@ -218,7 +222,8 @@
           (loop-block "retry"
                       (synchronous :c :d "query db"
                                    (note-over :c :d "over c and d"))
-                      (synchronous :c :c "query db"))
+                      (synchronous :c :c "query db"
+                                   (note-over :c "over c")))
           "false-async"
           (async :c :d "WAIT")
           "false-sync"
