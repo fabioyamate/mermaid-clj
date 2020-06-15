@@ -1,7 +1,9 @@
 (ns mermaid-clj.core
   (:require [clojure.data.json :as json]
-            [clojure.java.shell :as shell])
-  (:import java.util.Base64))
+            [clojure.java.shell :as shell]
+            [clj-http.client :as client])
+  (:import java.util.Base64
+           [java.io File]))
 
 (def direction->mermaid
   ;; Type   Meaning                      Description
@@ -194,13 +196,17 @@
               :env (assoc current-env "BROWSER" "firefox"))))
 
 (defn download-image
-  [diagram]
-  (let [current-env (into {} (System/getenv))]
-    (spit "/tmp/output.png" (slurp (format mermaid-img
-                                           (encode-base64
-                                            (json/write-str
-                                             {:code diagram
-                                              :mermaid {:theme "default"}})))))))
+  ([diagram]
+   (download-image diagram "/tmp/output.png"))
+  ([diagram destination]
+   (let [url (format mermaid-img
+                     (encode-base64
+                       (json/write-str
+                         {:code diagram
+                          :mermaid {:theme "default"}})))]
+     (clojure.java.io/copy
+       (:body (client/get url {:as :stream}))
+       (File. destination)))))
 
 (comment
   (def sample
